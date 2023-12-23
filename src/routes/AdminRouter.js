@@ -18,7 +18,7 @@ router.get("/student-list", getAllStudent);
 router.get("/instructor-list", getAllInstructor);
 router.get("/category-list", getAllCategory);
 router.get("/course-list", getAllCourses);
-
+//block
 router.patch("/block-student", blockStudent);
 router.patch("/unblock-student", unblockStudent);
 
