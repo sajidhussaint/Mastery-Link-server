@@ -67,10 +67,38 @@ export const getAllCategory = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+export const editCategory = async (req, res) => {
+  try {
+    const { categoryId, value } = req.body;
+    if (categoryId) {
+      await Category.findOneAndUpdate({ _id: categoryId }, { category: value });
+      res.status(200).json({ success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addCategory = async (req, res) => {
+  try {
+    const { category } = req.body;
+    const categoryData = Category.build({
+      category,
+    });
+    await categoryData.save();
+    res.status(201).send({ success: true });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
 
 export const getAllCourses = async (req, res) => {
   try {
-    const course = await Course.find().populate("category")
+    const course = await Course.find().populate("category");
     // .populate("language");
     console.log(course);
     res.status(200).json({ course });

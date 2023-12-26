@@ -9,6 +9,7 @@ import {
   unblockStudent,
   blockInstructor,
   unblockInstructor,
+  editCategory,addCategory
 } from "../controllers/AdminController.js";
 const router = Router();
 
@@ -17,6 +18,8 @@ router.post("/login", login);
 router.get("/student-list", getAllStudent);
 router.get("/instructor-list", getAllInstructor);
 router.get("/category-list", getAllCategory);
+router.patch("/category-list", editCategory);
+router.post("/category-list", addCategory);
 router.get("/course-list", getAllCourses);
 //block
 router.patch("/block-student", blockStudent);

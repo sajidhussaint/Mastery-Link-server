@@ -69,6 +69,7 @@ export const verifyStudent = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log(password);
     const student = await Student.findOne({ email });
     console.log(student, "stdent=======");
     if (!student?.isBlocked) {
