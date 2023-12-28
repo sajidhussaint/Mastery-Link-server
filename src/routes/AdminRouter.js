@@ -9,7 +9,9 @@ import {
   unblockStudent,
   blockInstructor,
   unblockInstructor,
-  editCategory,addCategory
+  editCategory,addCategory,
+  listCategory,
+  unlistCategory
 } from "../controllers/AdminController.js";
 const router = Router();
 
@@ -27,6 +29,10 @@ router.patch("/unblock-student", unblockStudent);
 
 router.patch("/block-instructor", blockInstructor);
 router.patch("/unblock-instructor", unblockInstructor);
+
+
+router.patch("/list-category",listCategory);
+router.patch("/unlist-category",unlistCategory);
 
 
 

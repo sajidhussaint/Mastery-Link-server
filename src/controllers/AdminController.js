@@ -173,3 +173,39 @@ export const unblockInstructor = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const listCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.body;
+    if (categoryId) {
+      const listedCategory = await Category.findOneAndUpdate(
+        { _id: categoryId },
+        { status: true }
+      );
+      res.status(200).json({ category: listedCategory, success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const unlistCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.body;
+    if (categoryId) {
+      const listedCategory = await Category.findOneAndUpdate(
+        { _id: categoryId },
+        { status: false }
+      );
+      res.status(200).json({ category: listedCategory, success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
