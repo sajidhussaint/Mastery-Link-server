@@ -3,6 +3,8 @@ import { Student } from "../models/studentModel.js";
 import { Instructor } from "../models/instructorModel.js";
 import { Category } from "../models/categoryModel.js";
 import { Course } from "../models/courseModel.js";
+import { Language } from "../models/languageModel.js";
+import { Level } from "../models/levelModel.js";
 import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
@@ -67,6 +69,7 @@ export const getAllCategory = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 export const editCategory = async (req, res) => {
   try {
     const { categoryId, value } = req.body;
@@ -98,9 +101,8 @@ export const addCategory = async (req, res) => {
 
 export const getAllCourses = async (req, res) => {
   try {
-    const course = await Course.find().populate("category");
-    // .populate("language");
-    console.log(course);
+    const course = await Course.find().populate("category").populate("language").populate("level")
+
     res.status(200).json({ course });
   } catch (error) {
     console.log(error.message);
@@ -201,6 +203,167 @@ export const unlistCategory = async (req, res) => {
         { status: false }
       );
       res.status(200).json({ category: listedCategory, success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+//languages
+
+export const getAllLanguage = async (req, res) => {
+  try {
+    const language = await Language.find();
+
+    console.log(language,'====this is language');
+    res.status(200).json({ language });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const editLanguage = async (req, res) => {
+  try {
+    const { languageId, value } = req.body;
+    if (languageId) {
+      await Language.findOneAndUpdate({ _id: languageId }, { language: value });
+      res.status(200).json({ success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addLanguage = async (req, res) => {
+  try {
+    const { language } = req.body;
+    const languageData = Language.build({
+      language,
+    });
+    await languageData.save();
+    res.status(201).send({ success: true });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const listLanguage = async (req, res) => {
+  try {
+    const { languageId } = req.body;
+    if (languageId) {
+      const listedLanguage = await Language.findOneAndUpdate(
+        { _id: languageId },
+        { status: true }
+      );
+      res.status(200).json({ language: listedLanguage, success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const unlistLanguage = async (req, res) => {
+  try {
+    const { languageId } = req.body;
+    if (languageId) {
+      const listedCategory = await Language.findOneAndUpdate(
+        { _id: languageId },
+        { status: false }
+      );
+      res.status(200).json({ language: listedCategory, success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+
+//levels
+
+export const getAllLevel = async (req, res) => {
+  try {
+    const level = await Level.find();
+
+    res.status(200).json({ level });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const editLevel = async (req, res) => {
+  try {
+    const { levelId, value } = req.body;
+    if (levelId) {
+      await Level.findOneAndUpdate({ _id: levelId }, { level: value });
+      res.status(200).json({ success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addLevel = async (req, res) => {
+  try {
+    const { level } = req.body;
+    const levelData = Level.build({
+      level,
+    });
+    await levelData.save();
+    res.status(201).send({ success: true });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const listLevel = async (req, res) => {
+  try {
+    const { levelId } = req.body;
+    if (levelId) {
+      const listedLevel = await Level.findOneAndUpdate(
+        { _id: levelId },
+        { status: true }
+      );
+      res.status(200).json({ language: listedLevel, success: true });
+    } else {
+      res.status(400).json({ message: "Invalid Id" });
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+
+export const unlistLevel = async (req, res) => {
+  try {
+    const { levelId } = req.body;
+    if (levelId) {
+      const listedLevel = await Level.findOneAndUpdate(
+        { _id: levelId },
+        { status: false }
+      );
+      res.status(200).json({ level: listedLevel, success: true });
     } else {
       res.status(400).json({ message: "Invalid Id" });
     }
