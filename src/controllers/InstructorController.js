@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import { Instructor } from "../models/instructorModel.js";
 import { sendEmail } from "../utils/nodeMailer.js";
 import { Otp } from "../models/otpModel.js";
+import { Course } from "../models/courseModel.js";
+
 
 export const signup = async (req, res) => {
   try {
@@ -114,3 +116,18 @@ console.log(error.message);
 return res.status(500).json({ message: 'Internal Server Error' });
  }
 }
+
+
+
+
+
+export const getMycourses = async (req, res) => {
+  try {
+    const course = await Course.find().populate('category')
+    console.log(course);
+    res.status(200).json({ course });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
