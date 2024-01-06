@@ -140,3 +140,25 @@ export const addCourse = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getSingleCourse = async (req, res, next) => {
+  try {
+    const { courseId } = req.params;
+    if (!courseId) {
+      return res.status(400);
+    }
+    const course = await Course.findById(courseId)
+      .populate("instructor")
+      .populate("level")
+      .populate("category")
+      .populate("language");
+    // .populate({
+    //   path: "modules.module",
+    //   model: "module",
+    // });
+    res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
