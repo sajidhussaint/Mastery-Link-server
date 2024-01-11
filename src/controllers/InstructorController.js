@@ -5,6 +5,8 @@ import { Instructor } from "../models/instructorModel.js";
 import { sendEmail } from "../utils/nodeMailer.js";
 import { Otp } from "../models/otpModel.js";
 import { Course } from "../models/courseModel.js";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
+import s3 from "../../config/aws.config.js";
 
 export const signup = async (req, res) => {
   try {
@@ -156,6 +158,45 @@ export const getSingleCourse = async (req, res, next) => {
     //   path: "modules.module",
     //   model: "module",
     // });
+    res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateCourseImage = async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    const file = req.file;
+    if (!file) {
+      res.status(404).json({ message: "file not found" });
+    }
+    const Singlecourse = await Course.findById(courseId);
+    if (!Singlecourse) {
+      res.status(404).json({ message: "course not found" });
+    }
+    // const sanitizedCourseName = course.name.replace(/\s/g, "_");
+    // Replace spaces with underscores or any character
+    // const sanitizedFileName = encodeURIComponent(file.originalname)
+    // const key = `courses/${sanitizedCourseName}/image/${sanitizedFileName}`;
+
+    const params = {
+      Bucket: "masterylink",
+      Key: `${Date.now()}.jpg`,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+    const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
+    console.log(filePath);
+
+    await s3.send(new PutObjectCommand(params));
+    const courses = await Course.findById(courseId);
+    courses.set({
+      image: filePath,
+    });
+    await courses.save();
+    const course = await Course.findById(courseId);
     res.status(200).json(course);
   } catch (error) {
     console.log(error.message);
