@@ -153,11 +153,11 @@ export const getSingleCourse = async (req, res, next) => {
       .populate("instructor")
       .populate("level")
       .populate("category")
-      .populate("language");
-    // .populate({
-    //   path: "modules.module",
-    //   model: "module",
-    // });
+      .populate("language")
+      // .populate({
+      //   path: "modules.module",
+      //   model: "module",
+      // });
     res.status(200).json(course);
   } catch (error) {
     console.log(error.message);
