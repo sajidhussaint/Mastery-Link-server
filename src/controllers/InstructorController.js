@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import getVideoDurationInSeconds from "get-video-duration";
 
 import { Instructor } from "../models/instructorModel.js";
 import { sendEmail } from "../utils/nodeMailer.js";
@@ -153,11 +154,11 @@ export const getSingleCourse = async (req, res, next) => {
       .populate("instructor")
       .populate("level")
       .populate("category")
-      .populate("language")
-      // .populate({
-      //   path: "modules.module",
-      //   model: "module",
-      // });
+      .populate("language");
+    // .populate({
+    //   path: "modules.module",
+    //   model: "module",
+    // });
     res.status(200).json(course);
   } catch (error) {
     console.log(error.message);
@@ -198,6 +199,45 @@ export const updateCourseImage = async (req, res) => {
     await courses.save();
     const course = await Course.findById(courseId);
     res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const createModule = async (req, res) => {
+  try {
+    const { name, description, courseId } = req.body;
+    const file = req.file;
+    console.log(name, description, courseId, file);
+    const existingModule = await Course.findById(courseId);
+    // const order = (existingModule?.course.modules?.length || 0) + 1;
+    const key = `courses/module/${name}/${file.originalname}`;
+    const params = {
+      Bucket: "masterylink",
+      Key: key,
+      Body: file.buffer,
+      ContentType: file.mimetype,
+    };
+    const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
+    console.log(filePath);
+    await s3.send(new PutObjectCommand(params));
+    // const duration = await getVideoDuration(filePath);
+    // const durationHMS = secondsToHMS(duration);
+    await getVideoDurationInSeconds(
+      "https://masterylink.s3.ap-south-1.amazonaws.com/courses/module/dddd/file_example_MP4_480_1_5MG.mp4"
+    ).then((duration) => {
+      console.log(duration);
+    });
+
+    const module = {
+      name,
+      description,
+      courseId,
+      module: filePath,
+      duration: durationHMS,
+    };
+    console.log(module);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });

@@ -6,7 +6,7 @@ import {
   getMycourses,
   addCourse,
   getSingleCourse,
-  updateCourseImage
+  updateCourseImage,createModule
 } from "../controllers/InstructorController.js";
 import { upload } from "../middlewares/multer.js";
 
@@ -23,6 +23,12 @@ router.put(
   "/add-course-image",
   upload.single("image"),
   updateCourseImage
+);
+
+router.post(
+  "/create-module",
+  upload.single("file"),
+  createModule
 );
 
 export default router;
