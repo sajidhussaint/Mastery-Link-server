@@ -1,13 +1,15 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import getVideoDurationInSeconds from "get-video-duration";
 
 import { Instructor } from "../models/instructorModel.js";
+import { Module } from "../models/moduleModel.js";
 import { sendEmail } from "../utils/nodeMailer.js";
 import { Otp } from "../models/otpModel.js";
 import { Course } from "../models/courseModel.js";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
 import s3 from "../../config/aws.config.js";
+import { videoDuration } from "@numairawan/video-duration";
+import { secondsToHMS } from "../utils/timeConverter.js";
 
 export const signup = async (req, res) => {
   try {
@@ -154,11 +156,11 @@ export const getSingleCourse = async (req, res, next) => {
       .populate("instructor")
       .populate("level")
       .populate("category")
-      .populate("language");
-    // .populate({
-    //   path: "modules.module",
-    //   model: "module",
-    // });
+      .populate("language")
+      .populate({
+        path: "modules.module",
+        model: "module",
+      });
     res.status(200).json(course);
   } catch (error) {
     console.log(error.message);
@@ -211,7 +213,11 @@ export const createModule = async (req, res) => {
     const file = req.file;
     console.log(name, description, courseId, file);
     const existingModule = await Course.findById(courseId);
-    // const order = (existingModule?.course.modules?.length || 0) + 1;
+    console.log("=================");
+    console.log(existingModule, "===");
+    console.log("=================");
+
+    const order = (existingModule?.modules?.length || 0) + 1;
     const key = `courses/module/${name}/${file.originalname}`;
     const params = {
       Bucket: "masterylink",
@@ -220,24 +226,28 @@ export const createModule = async (req, res) => {
       ContentType: file.mimetype,
     };
     const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
-    console.log(filePath);
     await s3.send(new PutObjectCommand(params));
-    // const duration = await getVideoDuration(filePath);
-    // const durationHMS = secondsToHMS(duration);
-    await getVideoDurationInSeconds(
-      "https://masterylink.s3.ap-south-1.amazonaws.com/courses/module/dddd/file_example_MP4_480_1_5MG.mp4"
-    ).then((duration) => {
-      console.log(duration);
-    });
+    console.log(filePath);
+    const { seconds } = await videoDuration(filePath);
+    console.log(seconds, "duration");
+    const durationHMS = secondsToHMS(seconds);
 
-    const module = {
+    const moduleData = {
       name,
       description,
       courseId,
       module: filePath,
       duration: durationHMS,
     };
-    console.log(module);
+    const module = Module.build(moduleData);
+    await module.save();
+    const CourseData = await Course.findById(courseId);
+    if (!CourseData) {
+      res.status(404).json({ message: "course not found" });
+    }
+    CourseData?.modules?.push({ module: module.id, order: order });
+    await CourseData.save();
+    res.status(200).json(CourseData);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
