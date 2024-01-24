@@ -3,6 +3,8 @@ import jwt from "jsonwebtoken";
 
 import { Otp } from "../models/otpModel.js";
 import { Student } from "../models/studentModel.js";
+import { Course } from "../models/courseModel.js";
+
 import { sendEmail } from "../utils/nodeMailer.js";
 
 export const signup = async (req, res) => {
@@ -65,7 +67,6 @@ export const verifyStudent = async (req, res) => {
   }
 };
 
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -110,6 +111,19 @@ export const login = async (req, res) => {
     } else {
       console.log("Student Blocked");
     }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getCourses = async (req, res) => {
+  try {
+    const courses = await Course.find({})
+      .populate("category")
+      .populate("level")
+      .populate("language");
+    res.status(200).json(courses);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
