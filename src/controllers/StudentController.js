@@ -6,6 +6,7 @@ import { Student } from "../models/studentModel.js";
 import { Course } from "../models/courseModel.js";
 
 import { sendEmail } from "../utils/nodeMailer.js";
+import { stripePayment } from "../utils/StripePayment.js";
 
 export const signup = async (req, res) => {
   try {
@@ -124,6 +125,40 @@ export const getCourses = async (req, res) => {
       .populate("level")
       .populate("language");
     res.status(200).json(courses);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const getSingleCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    if (!courseId) {
+      return res.status(400);
+    }
+    const course = await Course.findById(courseId)
+      .populate("instructor")
+      .populate("level")
+      .populate("category")
+      .populate("language")
+      .populate({
+        path: "modules.module",
+        model: "module",
+      });
+    res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const stripePaymentIntent = async (req, res) => {
+  try {
+    console.log("running stripe");
+    const { courseId,studentId } = req.body;
+    console.log(courseId,studentId);
+    const url = await stripePayment(courseId, studentId);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });

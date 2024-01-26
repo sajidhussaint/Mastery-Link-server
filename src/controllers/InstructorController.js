@@ -135,8 +135,6 @@ export const getMycourses = async (req, res) => {
 
 export const addCourse = async (req, res) => {
   try {
-    const { name, description, level, language, category, price, instructor } =
-      req.body;
     const courseData = Course.build(req.body);
     await courseData.save();
     res.status(200).json(courseData);
