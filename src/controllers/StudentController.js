@@ -4,9 +4,12 @@ import jwt from "jsonwebtoken";
 import { Otp } from "../models/otpModel.js";
 import { Student } from "../models/studentModel.js";
 import { Course } from "../models/courseModel.js";
+import { Instructor } from "../models/instructorModel.js";
 
 import { sendEmail } from "../utils/nodeMailer.js";
 import { stripePayment } from "../utils/StripePayment.js";
+import { EnrolledCourse } from "../models/enrolledCourse.js";
+const INSTRUCTOR_COURSE_PERCENTAGE = 70;
 
 export const signup = async (req, res) => {
   try {
@@ -156,9 +159,62 @@ export const getSingleCourse = async (req, res) => {
 export const stripePaymentIntent = async (req, res) => {
   try {
     console.log("running stripe");
-    const { courseId,studentId } = req.body;
-    console.log(courseId,studentId);
+    const { courseId, studentId } = req.body;
+    console.log(courseId, studentId);
     const url = await stripePayment(courseId, studentId);
+    res.status(200).json(url);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const enrollCourse = async (req, res) => {
+  try {
+    const { courseId, studentId } = req.body;
+    const existingEnrollment = await EnrolledCourse.findOne({
+      studentId,
+      courseId,
+    });
+    if (existingEnrollment) {
+      return res.status(400).json({ message: "Course already enrolled" });
+    }
+    const course = await Course.findById(courseId);
+    const student = await Student.findById(studentId);
+    if (!student) {
+      return res.status(400).json({ message: "Id not valid" });
+    }
+    student.courses?.push(courseId);
+    await student.save();
+
+    const enrolledCourse = EnrolledCourse.build({
+      courseId,
+      studentId,
+      price: course?.price,
+    });
+    await enrolledCourse.save();
+    const instructorAmount =
+      (course.price * INSTRUCTOR_COURSE_PERCENTAGE) / 100;
+    const description = `Enrollment fee from course ${course?.name} (ID: ${course?.id})`;
+
+    if (course) {
+      const instructor = await Instructor.findById(course.instructor);
+      if (!instructor) {
+        return res.status(400).json({ message: "Instructor not found" });
+      }
+      instructor.set({ wallet: (instructor.wallet ?? 0) + instructorAmount });
+      await instructor.save();
+
+      const walletHistoryDetails = {
+        instructorAmount,
+        description,
+        date: new Date(),
+      };
+      instructor.walletHistory?.push(walletHistoryDetails);
+      await instructor.save();
+    }
+
+    res.status(201).json(enrolledCourse);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });

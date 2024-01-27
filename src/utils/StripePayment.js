@@ -1,10 +1,9 @@
-import { Course } from "../models/courseModel";
-import { EnrolledCourse } from "../models/enrolledCourse";
+import { Course } from "../models/courseModel.js";
+import { EnrolledCourse } from "../models/enrolledCourse.js";
 import Stripe from "stripe";
 
-const stripe = new Stripe(process.env.STRIPE_KEY);
-
 export const stripePayment = async (courseId, studentId) => {
+  const stripe = new Stripe(process.env.STRIPE_KEY);
   const course = await Course.findById(courseId);
   const existingEnrollment = await EnrolledCourse.findOne({
     studentId,

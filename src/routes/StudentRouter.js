@@ -5,7 +5,8 @@ import {
   login,
   getCourses,
   getSingleCourse,
-  stripePaymentIntent
+  stripePaymentIntent,
+  enrollCourse
 } from "../controllers/StudentController.js";
 
 const router = Router();
@@ -16,5 +17,6 @@ router.post("/verify-otp", verifyStudent);
 router.get("/courses", getCourses);
 router.get("/course/:courseId", getSingleCourse);
 router.post("/create-payment-intent", stripePaymentIntent);
+router.post("/create-payment",enrollCourse);
 
 export default router;
