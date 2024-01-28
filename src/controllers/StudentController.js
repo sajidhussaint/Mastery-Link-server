@@ -206,7 +206,7 @@ export const enrollCourse = async (req, res) => {
       await instructor.save();
 
       const walletHistoryDetails = {
-        instructorAmount,
+        amount: instructorAmount,
         description,
         date: new Date(),
       };
