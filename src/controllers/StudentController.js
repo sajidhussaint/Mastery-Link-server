@@ -220,3 +220,24 @@ export const enrollCourse = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getEnrolledCourse = async (req, res) => {
+  try {
+    const { courseId, studentId } = req.query;
+
+    const enrolledCourse = await EnrolledCourse.findOne({
+      studentId,
+      courseId,
+    }).populate({
+      path: "courseId",
+      populate: {
+        path: "modules.module",
+        model: "module",
+      },
+    });
+    res.status(200).json(enrolledCourse);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
