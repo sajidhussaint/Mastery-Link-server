@@ -209,11 +209,9 @@ export const createModule = async (req, res) => {
   try {
     const { name, description, courseId } = req.body;
     const file = req.file;
-    console.log(name, description, courseId, file);
+    // console.log(name, description, courseId, file);
     const existingModule = await Course.findById(courseId);
-    console.log("=================");
-    console.log(existingModule, "===");
-    console.log("=================");
+
 
     const order = (existingModule?.modules?.length || 0) + 1;
     const key = `courses/module/${name}/${file.originalname}`;
@@ -227,7 +225,6 @@ export const createModule = async (req, res) => {
     await s3.send(new PutObjectCommand(params));
     console.log(filePath);
     const { seconds } = await videoDuration(filePath);
-    console.log(seconds, "duration");
     const durationHMS = secondsToHMS(seconds);
 
     const moduleData = {
@@ -245,6 +242,7 @@ export const createModule = async (req, res) => {
     }
     CourseData?.modules?.push({ module: module.id, order: order });
     await CourseData.save();
+    console.log(CourseData);
     res.status(200).json(CourseData);
   } catch (error) {
     console.log(error.message);
