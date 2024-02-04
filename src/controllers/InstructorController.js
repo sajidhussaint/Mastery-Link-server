@@ -212,7 +212,6 @@ export const createModule = async (req, res) => {
     // console.log(name, description, courseId, file);
     const existingModule = await Course.findById(courseId);
 
-
     const order = (existingModule?.modules?.length || 0) + 1;
     const key = `courses/module/${name}/${file.originalname}`;
     const params = {
@@ -244,6 +243,29 @@ export const createModule = async (req, res) => {
     await CourseData.save();
     console.log(CourseData);
     res.status(200).json(CourseData);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addChapter = async (req, res) => {
+  try {
+    const { moduleId, time, chapter } = req.body;
+    console.log(moduleId, time, chapter);
+    const seconds = Number(160);
+    const duration = secondsToHMS(seconds);
+    const chapterDetails = {
+      chapter,
+      seconds,
+      duration,
+    };
+    const module = await Module.findById(moduleId);
+    module?.chapters?.push(chapterDetails);
+    await module.save();
+
+    res.status(200).json(module);
+    
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
