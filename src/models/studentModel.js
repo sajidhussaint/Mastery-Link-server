@@ -39,7 +39,11 @@ const studentSchema = new mongoose.Schema(
         type: mongoose.Schema.Types.ObjectId,
         ref: "courses"
       }
-    ]
+    ],
+    createdAt: {
+      type: Date,
+      default: Date.now
+    }
   },
   {
     toJSON: {
