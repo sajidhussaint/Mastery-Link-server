@@ -162,6 +162,7 @@ export const stripePaymentIntent = async (req, res) => {
     const { courseId, studentId } = req.body;
     console.log(courseId, studentId);
     const url = await stripePayment(courseId, studentId);
+    console.log("oooo");
     res.status(200).json(url);
   } catch (error) {
     console.log(error.message);
@@ -236,6 +237,19 @@ export const getEnrolledCourse = async (req, res) => {
       },
     });
     res.status(200).json(enrolledCourse);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addNotes = async (req, res, next) => {
+  try {
+    const { enrolledId, notes } = req.body;
+    const course = await EnrolledCourse.findById(enrolledId);
+    course?.notes?.push(notes);
+    await course?.save();
+    res.status(201).json(course);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
