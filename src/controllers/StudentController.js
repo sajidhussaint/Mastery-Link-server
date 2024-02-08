@@ -285,3 +285,25 @@ export const updatePassword = async (req, res, next) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { firstname, lastname, mobile, studentId } = req.body;
+    const student = await Student.findById(studentId);
+    console.log(student,'lllll');
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" }); // Added return statement
+    }
+    student.set({
+      firstname,
+      lastname,
+      mobile,
+    });
+    await student.save();
+    res.status(200).json(student);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
