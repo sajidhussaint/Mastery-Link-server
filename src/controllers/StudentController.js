@@ -255,3 +255,33 @@ export const addNotes = async (req, res, next) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const updatePassword = async (req, res, next) => {
+  try {
+    const { newPassword, currentPassword, studentId } = req.body;
+    if (!studentId) {
+      res.status(400).json({ message: "Invalid token" });
+    }
+    const student = await Student.findById(studentId);
+    //TODO:handle invalid id
+
+    const isPasswordVerified = await bcrypt.compare(
+      currentPassword,
+      student.password
+    );
+
+    if (!isPasswordVerified) {
+      res.status(401).json({ meassage: "Incorrect password" });
+    } else {
+      const hashedPassword = await bcrypt.hash(newPassword, 10);
+      student.set({
+        password: hashedPassword,
+      });
+      await student.save();
+      res.status(200).json(student);
+    }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
