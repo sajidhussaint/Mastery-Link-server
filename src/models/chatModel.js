@@ -29,7 +29,10 @@ const chatSchema = new mongoose.Schema(
         createdAt: {
           type: Date,
           default: Date.now
-        }
+        },
+        isInstructor: {
+          type: Boolean,
+        },
       }
     ]
   },

@@ -38,6 +38,7 @@ io.on("connection", (socket) => {
 
   socket.on("get-all-messages", async ({ courseId }) => {
     const messages = await Chat.findOne({ courseId });
+    console.log(messages,'message founded');
 
     io.to(courseId).emit("get-course-response", messages);
   });
