@@ -23,6 +23,7 @@ import {
   getAllLevel,
   listLevel,
   unlistLevel,
+  adminDashBoard
 } from "../controllers/AdminController.js";
 const router = Router();
 
@@ -59,6 +60,7 @@ router.patch("/edit-level", editLevel);
 router.post("/add-level", addLevel);
 router.patch("/list-level", listLevel);
 router.patch("/unlist-level", unlistLevel);
+router.get("/dashboard",adminDashBoard);
 
 
 export default router;

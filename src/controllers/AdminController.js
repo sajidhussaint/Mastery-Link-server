@@ -5,6 +5,7 @@ import { Category } from "../models/categoryModel.js";
 import { Course } from "../models/courseModel.js";
 import { Language } from "../models/languageModel.js";
 import { Level } from "../models/levelModel.js";
+import { EnrolledCourse } from "../models/enrolledCourse.js";
 import jwt from "jsonwebtoken";
 
 export const login = async (req, res) => {
@@ -101,7 +102,10 @@ export const addCategory = async (req, res) => {
 
 export const getAllCourses = async (req, res) => {
   try {
-    const course = await Course.find().populate("category").populate("language").populate("level")
+    const course = await Course.find()
+      .populate("category")
+      .populate("language")
+      .populate("level");
 
     res.status(200).json({ course });
   } catch (error) {
@@ -218,7 +222,7 @@ export const getAllLanguage = async (req, res) => {
   try {
     const language = await Language.find();
 
-    console.log(language,'====this is language');
+    console.log(language, "====this is language");
     res.status(200).json({ language });
   } catch (error) {
     console.log(error.message);
@@ -273,7 +277,6 @@ export const listLanguage = async (req, res) => {
   }
 };
 
-
 export const unlistLanguage = async (req, res) => {
   try {
     const { languageId } = req.body;
@@ -291,8 +294,6 @@ export const unlistLanguage = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
-
 
 //levels
 
@@ -354,7 +355,6 @@ export const listLevel = async (req, res) => {
   }
 };
 
-
 export const unlistLevel = async (req, res) => {
   try {
     const { levelId } = req.body;
@@ -367,6 +367,94 @@ export const unlistLevel = async (req, res) => {
     } else {
       res.status(400).json({ message: "Invalid Id" });
     }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const adminDashBoard = async (req, res) => {
+  try {
+    const enrolledCountByCategoryAndDate = await EnrolledCourse.aggregate([
+      {
+        $lookup: {
+          from: "courses",
+          localField: "courseId",
+          foreignField: "_id",
+          as: "course",
+        },
+      },
+      {
+        $unwind: "$course",
+      },
+      {
+        $group: {
+          _id: {
+            category: "$course.category",
+            date: {
+              $dateToString: { format: "%Y-%m-%d", date: "$date" },
+            },
+          },
+          enrolledCount: { $sum: 1 },
+        },
+      },
+      {
+        $group: {
+          _id: "$_id.category",
+          data: {
+            $push: {
+              date: "$_id.date",
+              enrolledCount: "$enrolledCount",
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          category: "$_id",
+          data: 1,
+          _id: 0,
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category",
+          foreignField: "_id",
+          as: "categoryDetails",
+        },
+      },
+    ]);
+
+    let totalRevenue = 0;
+    const totalRevenueResult = await EnrolledCourse.aggregate([
+      {
+        $match: {
+          status: true, // Assuming you want to consider only enrolled courses with status true
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: "$price" },
+        },
+      },
+    ]);
+    if (totalRevenueResult.length > 0) {
+      totalRevenue = totalRevenueResult[0].totalRevenue;
+    }
+
+    const instructorCount = await Instructor.countDocuments();
+    const studentCount = await Student.countDocuments();
+    const courseCount = await Course.countDocuments();
+
+    res.status(200).json({
+      enrolledCountByCategoryAndDate,
+      totalRevenue,
+      instructorCount,
+      studentCount,
+      courseCount,
+    });
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });

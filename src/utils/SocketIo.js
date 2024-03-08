@@ -21,7 +21,7 @@ io.on("connection", (socket) => {
 
   // Listen for chat messages
   socket.on("join-room", (data) => {
-    console.log(data,'join room');
+    console.log(data, "join room");
     socket.join(data.courseId);
 
     if (activeMembers.has(data.courseId)) {
@@ -38,8 +38,9 @@ io.on("connection", (socket) => {
 
   socket.on("get-all-messages", async ({ courseId }) => {
     const messages = await Chat.findOne({ courseId });
-    console.log(messages,'message founded');
 
+    console.log(messages, "message founded");
+    
     io.to(courseId).emit("get-course-response", messages);
   });
 
