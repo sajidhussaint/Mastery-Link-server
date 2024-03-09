@@ -23,7 +23,9 @@ import {
   getAllLevel,
   listLevel,
   unlistLevel,
-  adminDashBoard
+  adminDashBoard,
+  approveCourse,
+  rejectCourse,
 } from "../controllers/AdminController.js";
 const router = Router();
 
@@ -60,7 +62,10 @@ router.patch("/edit-level", editLevel);
 router.post("/add-level", addLevel);
 router.patch("/list-level", listLevel);
 router.patch("/unlist-level", unlistLevel);
-router.get("/dashboard",adminDashBoard);
 
+router.get("/dashboard", adminDashBoard);
+
+router.patch("/approve-course", approveCourse);
+router.patch("/reject-course", rejectCourse);
 
 export default router;

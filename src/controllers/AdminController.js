@@ -460,3 +460,39 @@ export const adminDashBoard = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const approveCourse = async (req, res, next) => {
+  try {
+    const { courseId } = req.body;
+    if (!courseId) {
+      res.status(400).json({ message: "Course Id not found" });
+    }
+    const course = await Course.findById(courseId);
+    course.set({
+      approval: "approved",
+    });
+    await course.save();
+    res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const rejectCourse = async (req, res, next) => {
+  try {
+    const { courseId } = req.body;
+    if (!courseId) {
+      res.status(400).json({ message: "Course Id not found" });
+    }
+    const course = await Course.findById(courseId);
+    course.set({
+      approval: "rejected",
+    });
+    await course.save();
+    res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
