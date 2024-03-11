@@ -253,7 +253,7 @@ export const addChapter = async (req, res) => {
   try {
     const { moduleId, time, chapter } = req.body;
     console.log(moduleId, time, chapter);
-    const seconds = Number(160);
+    const seconds = Number(time);
     const duration = secondsToHMS(seconds);
     const chapterDetails = {
       chapter,
@@ -265,7 +265,6 @@ export const addChapter = async (req, res) => {
     await module.save();
 
     res.status(200).json(module);
-    
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
