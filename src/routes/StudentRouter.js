@@ -10,7 +10,7 @@ import {
   getEnrolledCourse,
   addNotes,
   updatePassword,
-  updateProfile
+  updateProfile,searchCourses
 } from "../controllers/StudentController.js";
 
 const router = Router();
@@ -26,5 +26,6 @@ router.get("/get-enrolled-course", getEnrolledCourse);
 router.post("/add-notes", addNotes);
 router.patch("/change-password", updatePassword);
 router.put("/update-profile", updateProfile);
+router.get("/search-course", searchCourses);
 
 export default router;

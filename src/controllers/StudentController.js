@@ -5,6 +5,7 @@ import { Otp } from "../models/otpModel.js";
 import { Student } from "../models/studentModel.js";
 import { Course } from "../models/courseModel.js";
 import { Instructor } from "../models/instructorModel.js";
+import { Category } from "../models/categoryModel.js";
 
 import { sendEmail } from "../utils/nodeMailer.js";
 import { stripePayment } from "../utils/StripePayment.js";
@@ -123,16 +124,36 @@ export const login = async (req, res) => {
 
 export const getCourses = async (req, res) => {
   try {
-    const courses = await Course.find({})
-      .populate("category")
-      .populate("level")
-      .populate("language");
-    res.status(200).json(courses);
+    const { category } = req.query;
+    console.log(category);
+
+    const categories = await Category.find({ status: true });
+
+    if (category == "undefined") {
+      const courses = await Course.find({})
+        .populate("category")
+        .populate("level")
+        .populate("language");
+      res.status(200).json({
+        courses,
+        categories,
+      });
+    } else {
+      const courses = await Course.find({ category })
+        .populate("category")
+        .populate("level")
+        .populate("language");
+      res.status(200).json({
+        courses,
+        categories,
+      });
+    }
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
 
 export const getSingleCourse = async (req, res) => {
   try {
@@ -290,7 +311,7 @@ export const updateProfile = async (req, res, next) => {
   try {
     const { firstname, lastname, mobile, studentId } = req.body;
     const student = await Student.findById(studentId);
-    console.log(student,'lllll');
+    console.log(student, "lllll");
     if (!student) {
       return res.status(404).json({ message: "Student not found" }); // Added return statement
     }
@@ -307,3 +328,34 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
+export const searchCourses = async (req, res, next) => {
+  try {
+    const { search, category, level, language } = req.query;
+    const inputs = {};
+
+    if (search) {
+      inputs.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    if (category) {
+      inputs.category = category;
+    }
+    if (level) {
+      inputs.level = level;
+    }
+    if (language) {
+      inputs.language = language;
+    }
+
+    const course = await Course.find({ approval: "approved", ...inputs })
+      .populate("category")
+      .populate("level");
+    res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
