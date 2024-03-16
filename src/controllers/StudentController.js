@@ -98,8 +98,7 @@ export const login = async (req, res) => {
             courses: student.courses,
             image: student.image,
             role: "student",
-            createdAt:student.createdAt
-
+            createdAt: student.createdAt,
           };
           res.status(200).json({
             message: "Student signed in",
@@ -154,7 +153,6 @@ export const getCourses = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
-
 
 export const getSingleCourse = async (req, res) => {
   try {
@@ -355,6 +353,29 @@ export const searchCourses = async (req, res, next) => {
       .populate("category")
       .populate("level");
     res.status(200).json(course);
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const addProgression = async (req, res, next) => {
+  try {
+    const { enrollmentId, moduleId } = req.query;
+    console.log(enrollmentId);
+    const progression = await EnrolledCourse.findOne({
+      courseId: enrollmentId,
+    });
+    if (!progression) {
+      console.log("no progress");
+      return res.status(400).json({ message: "Enrollment not found" });
+    }
+    if (!progression.progression?.includes(moduleId)) {
+      progression.progression?.push(moduleId);
+      await progression.save(); // Assuming progression is a Mongoose document instance
+    }
+
+    res.status(201).json(progression);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
