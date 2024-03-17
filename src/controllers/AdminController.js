@@ -33,7 +33,7 @@ export const login = async (req, res) => {
         success: true,
       });
     } else {
-      console.log("incorrect password");
+      console.log("incorrect password");//TODO:fix incorrect pass
     }
   } catch (error) {
     console.log(error.message);

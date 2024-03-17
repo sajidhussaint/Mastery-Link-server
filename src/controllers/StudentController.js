@@ -75,8 +75,15 @@ export const verifyStudent = async (req, res) => {
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    const student = await Student.findOne({ email });
-    console.log(student, "stdent=======");
+    const student = await Student.findOne({ email }).populate({
+      path: "courses",
+      model: "course",
+      populate: [
+        { path: "language", model: "language" },
+        { path: "category", model: "category" },
+      ],
+    });
+
     if (!student?.isBlocked) {
       const validPassword = await bcrypt.compare(password, student.password);
       if (validPassword) {
@@ -100,6 +107,7 @@ export const login = async (req, res) => {
             role: "student",
             createdAt: student.createdAt,
           };
+
           res.status(200).json({
             message: "Student signed in",
             token: studentJwt,
@@ -306,11 +314,17 @@ export const updatePassword = async (req, res, next) => {
   }
 };
 
-export const updateProfile = async (req, res, next) => {
+export const updateProfile = async (req, res) => {
   try {
     const { firstname, lastname, mobile, studentId } = req.body;
-    const student = await Student.findById(studentId);
-    console.log(student, "lllll");
+    const student = await Student.findById(studentId).populate({
+      path: "courses",
+      model: "course",
+      populate: [
+        { path: "language", model: "language" },
+        { path: "category", model: "category" },
+      ],
+    });
     if (!student) {
       return res.status(404).json({ message: "Student not found" }); // Added return statement
     }
