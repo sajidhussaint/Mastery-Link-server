@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 import { Instructor } from "../models/instructorModel.js";
+import { EnrolledCourse } from "../models/enrolledCourse.js";
 import { Module } from "../models/moduleModel.js";
 import { sendEmail } from "../utils/nodeMailer.js";
 import { Otp } from "../models/otpModel.js";
@@ -159,7 +160,11 @@ export const getSingleCourse = async (req, res, next) => {
         path: "modules.module",
         model: "module",
       });
-    res.status(200).json(course);
+
+    const enrollments = await EnrolledCourse.find({ courseId }).populate(
+      "studentId"
+    );
+    res.status(200).json({course,enrollments});
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
