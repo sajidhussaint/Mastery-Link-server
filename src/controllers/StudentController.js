@@ -271,9 +271,10 @@ export const getEnrolledCourse = async (req, res) => {
   }
 };
 
-export const addNotes = async (req, res, next) => {
+export const addNotes = async (req, res) => {
   try {
     const { enrolledId, notes } = req.body;
+    console.log(enrolledId, notes,'sss');
     const course = await EnrolledCourse.findById(enrolledId);
     course?.notes?.push(notes);
     await course?.save();
