@@ -12,6 +12,9 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(401).json({ message: "Invalid User Found" });
+    }
     if (admin.password === password) {
       const adminJwt = jwt.sign(
         {
@@ -33,11 +36,11 @@ export const login = async (req, res) => {
         success: true,
       });
     } else {
-      console.log("incorrect password");//TODO:fix incorrect pass
+      return res.status(401).json({ message: "Invalid Password" });
     }
   } catch (error) {
     console.log(error.message);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ message: "Internal Server Error." });
   }
 };
 
@@ -88,10 +91,8 @@ export const editCategory = async (req, res) => {
 
 export const addCategory = async (req, res) => {
   try {
-    const { category } = req.body;
-    const categoryData = Category.build({
-      category,
-    });
+    const category = req.body.category;
+    const categoryData = Category.build(category);
     await categoryData.save();
     res.status(201).send({ success: true });
   } catch (error) {
@@ -375,6 +376,8 @@ export const unlistLevel = async (req, res) => {
 
 export const adminDashBoard = async (req, res) => {
   try {
+    console.log("=>>>> ");
+
     const enrolledCountByCategoryAndDate = await EnrolledCourse.aggregate([
       {
         $lookup: {

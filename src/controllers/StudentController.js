@@ -15,7 +15,12 @@ const INSTRUCTOR_COURSE_PERCENTAGE = 70;
 export const signup = async (req, res) => {
   try {
     const { firstname, lastname, email, password, mobile } = req.body;
+    const AlreadyStudent = await Student.findOne({ email });
+    if (AlreadyStudent) {
+      return res.status(401).json({ message: "Student Alredy Exist" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const student = Student.build({
       firstname,
       lastname,
@@ -83,6 +88,9 @@ export const login = async (req, res) => {
         { path: "category", model: "category" },
       ],
     });
+    if (!student) {
+      return res.status(401).json({ message: "Invalid User Found" });
+    }
 
     if (!student?.isBlocked) {
       const validPassword = await bcrypt.compare(password, student.password);
@@ -116,13 +124,13 @@ export const login = async (req, res) => {
           });
         } else {
           await sendEmail(email);
-          console.log("Not verified");
+          return res.status(401).json({ message: "Not verified" });
         }
       } else {
-        console.log("Incorrect password");
+        return res.status(401).json({ message: "Incorrect password" });
       }
     } else {
-      console.log("Student Blocked");
+      return res.status(401).json({ message: "Student Blocked" });
     }
   } catch (error) {
     console.log(error.message);
@@ -133,7 +141,7 @@ export const login = async (req, res) => {
 export const getCourses = async (req, res) => {
   try {
     const { category } = req.query;
-    console.log(category);
+    console.log(category,'cat');
 
     const categories = await Category.find({ status: true });
 
@@ -142,6 +150,7 @@ export const getCourses = async (req, res) => {
         .populate("category")
         .populate("level")
         .populate("language");
+        
       res.status(200).json({
         courses,
         categories,
@@ -274,7 +283,7 @@ export const getEnrolledCourse = async (req, res) => {
 export const addNotes = async (req, res) => {
   try {
     const { enrolledId, notes } = req.body;
-    console.log(enrolledId, notes,'sss');
+    console.log(enrolledId, notes, "sss");
     const course = await EnrolledCourse.findById(enrolledId);
     course?.notes?.push(notes);
     await course?.save();

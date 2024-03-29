@@ -15,6 +15,10 @@ import { secondsToHMS } from "../utils/timeConverter.js";
 export const signup = async (req, res) => {
   try {
     const { firstname, lastname, email, password, mobile } = req.body;
+    const AlreadyInstructor = await Instructor.findOne({ email });
+    if (AlreadyInstructor) {
+      return res.status(401).json({ message: "Instructor Alredy Exist" });
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
     const InstructorData = Instructor.build({
       firstname,
@@ -76,7 +80,10 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const instructor = await Instructor.findOne({ email });
-    console.log(instructor, "instru=======");
+
+    if (!instructor) {
+      return res.status(401).json({ message: "Invalid User Found" });
+    }
     if (!instructor?.isBlocked) {
       const validPassword = await bcrypt.compare(password, instructor.password);
       if (validPassword) {
@@ -109,13 +116,13 @@ export const login = async (req, res) => {
           });
         } else {
           await sendEmail(email);
-          console.log("Not verified");
+          return res.status(401).json({ message: "Not verified" });
         }
       } else {
-        console.log("Incorrect password");
+        return res.status(401).json({ message: "Incorrect password" });
       }
     } else {
-      console.log("Student Blocked");
+      return res.status(401).json({ message: "Instructor Blocked" });
     }
   } catch (error) {
     console.log(error.message);
@@ -125,8 +132,10 @@ export const login = async (req, res) => {
 
 export const getMycourses = async (req, res) => {
   try {
-    const course = await Course.find().populate("category");
-    console.log(course);
+    const { instructor } = req.query;
+    console.log(instructor);
+    const course = await Course.find({ instructor }).populate("category");
+
     res.status(200).json({ course });
   } catch (error) {
     console.log(error.message);
@@ -164,7 +173,7 @@ export const getSingleCourse = async (req, res, next) => {
     const enrollments = await EnrolledCourse.find({ courseId }).populate(
       "studentId"
     );
-    res.status(200).json({course,enrollments});
+    res.status(200).json({ course, enrollments });
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
