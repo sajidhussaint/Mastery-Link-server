@@ -222,8 +222,6 @@ export const unlistCategory = async (req, res) => {
 export const getAllLanguage = async (req, res) => {
   try {
     const language = await Language.find();
-
-    console.log(language, "====this is language");
     res.status(200).json({ language });
   } catch (error) {
     console.log(error.message);
@@ -233,7 +231,11 @@ export const getAllLanguage = async (req, res) => {
 
 export const editLanguage = async (req, res) => {
   try {
-    const { languageId, value } = req.body;
+    console.log('=================');
+    console.log(req.body,'===');
+    console.log('=================');
+    
+    const { languageId, value } = req.body.data;
     if (languageId) {
       await Language.findOneAndUpdate({ _id: languageId }, { language: value });
       res.status(200).json({ success: true });
@@ -311,7 +313,7 @@ export const getAllLevel = async (req, res) => {
 
 export const editLevel = async (req, res) => {
   try {
-    const { levelId, value } = req.body;
+    const { levelId, value } = req.body.data;
     if (levelId) {
       await Level.findOneAndUpdate({ _id: levelId }, { level: value });
       res.status(200).json({ success: true });
