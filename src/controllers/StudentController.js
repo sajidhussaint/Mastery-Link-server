@@ -140,31 +140,43 @@ export const login = async (req, res) => {
 
 export const getCourses = async (req, res) => {
   try {
-    const { category } = req.query;
-    console.log(category,'cat');
+    const { category, search } = req.query;
 
-    const categories = await Category.find({ status: true });
+    const inputs = {};
+    if (search && search != "") {
+      inputs.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { description: { $regex: search, $options: "i" } },
+      ];
+      const courses = await Course.find({ approval: "approved", ...inputs })
+        .populate("category")
+        .populate("level")
+        .populate("language");
 
-    if (category == "undefined") {
+      return res.status(200).json(courses);
+    } else if (category == "default" && search == "") {
       const courses = await Course.find({})
         .populate("category")
         .populate("level")
         .populate("language");
-        
-      res.status(200).json({
-        courses,
-        categories,
-      });
+      return res.status(200).json(courses);
     } else {
       const courses = await Course.find({ category })
         .populate("category")
         .populate("level")
         .populate("language");
-      res.status(200).json({
-        courses,
-        categories,
-      });
+
+      res.status(200).json(courses);
     }
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+export const getCategory = async (req, res) => {
+  try {
+    const categories = await Category.find({ status: true });
+    res.status(200).json(categories);
   } catch (error) {
     console.log(error.message);
     return res.status(500).json({ message: "Internal Server Error" });
@@ -351,38 +363,40 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-export const searchCourses = async (req, res, next) => {
-  try {
-    const { search, category, level, language } = req.query;
-    console.log(req.query);
-    const inputs = {};
+//TODO:remove func
 
-    if (search) {
-      inputs.$or = [
-        { name: { $regex: search, $options: "i" } },
-        { description: { $regex: search, $options: "i" } },
-      ];
-    }
+// export const searchCourses = async (req, res, next) => {
+//   try {
+//     const { search, category, level, language } = req.query;
+//     console.log(req.query);
+//     const inputs = {};
 
-    if (category) {
-      inputs.category = category;
-    }
-    if (level) {
-      inputs.level = level;
-    }
-    if (language) {
-      inputs.language = language;
-    }
+//     if (search) {
+//       inputs.$or = [
+//         { name: { $regex: search, $options: "i" } },
+//         { description: { $regex: search, $options: "i" } },
+//       ];
+//     }
 
-    const course = await Course.find({ approval: "approved", ...inputs })
-      .populate("category")
-      .populate("level");
-    res.status(200).json(course);
-  } catch (error) {
-    console.log(error.message);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
+//     if (category) {
+//       inputs.category = category;
+//     }
+//     if (level) {
+//       inputs.level = level;
+//     }
+//     if (language) {
+//       inputs.language = language;
+//     }
+
+//     const course = await Course.find({ approval: "approved", ...inputs })
+//       .populate("category")
+//       .populate("level");
+//     res.status(200).json(course);
+//   } catch (error) {
+//     console.log(error.message);
+//     return res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
 
 export const addProgression = async (req, res, next) => {
   try {

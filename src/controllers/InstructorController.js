@@ -197,7 +197,7 @@ export const updateCourseImage = async (req, res) => {
     // const key = `courses/${sanitizedCourseName}/image/${sanitizedFileName}`;
 
     const params = {
-      Bucket: "masterylink",
+      Bucket: "masterylinks",
       Key: `${Date.now()}.jpg`,
       Body: file.buffer,
       ContentType: file.mimetype,
@@ -229,7 +229,7 @@ export const createModule = async (req, res) => {
     const order = (existingModule?.modules?.length || 0) + 1;
     const key = `courses/module/${name}/${file.originalname}`;
     const params = {
-      Bucket: "masterylink",
+      Bucket: "masterylinks",
       Key: key,
       Body: file.buffer,
       ContentType: file.mimetype,
