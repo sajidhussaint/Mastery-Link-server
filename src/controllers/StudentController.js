@@ -354,6 +354,7 @@ export const updateProfile = async (req, res) => {
 export const searchCourses = async (req, res, next) => {
   try {
     const { search, category, level, language } = req.query;
+    console.log(req.query);
     const inputs = {};
 
     if (search) {
