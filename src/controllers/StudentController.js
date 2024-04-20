@@ -141,6 +141,7 @@ export const login = async (req, res) => {
 export const getCourses = async (req, res) => {
   try {
     const { category, search } = req.query;
+    console.log(search);
 
     const inputs = {};
     if (search && search != "") {
@@ -155,13 +156,13 @@ export const getCourses = async (req, res) => {
 
       return res.status(200).json(courses);
     } else if (category == "default" && search == "") {
-      const courses = await Course.find({})
+      const courses = await Course.find({approval: "approved"})
         .populate("category")
         .populate("level")
         .populate("language");
       return res.status(200).json(courses);
     } else {
-      const courses = await Course.find({ category })
+      const courses = await Course.find({approval: "approved", category })
         .populate("category")
         .populate("level")
         .populate("language");
