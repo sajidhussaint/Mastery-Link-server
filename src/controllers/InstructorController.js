@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose"
 
 import { Instructor } from "../models/instructorModel.js";
 import { EnrolledCourse } from "../models/enrolledCourse.js";
@@ -146,7 +147,11 @@ export const getMycourses = async (req, res) => {
 export const addCourse = async (req, res) => {
   try {
     const courseData = Course.build(req.body);
+
     await courseData.save();
+    const instructor = await Instructor.findById(req.query.instructorId);
+    instructor.courses?.push(courseData?._id);
+    await instructor.save();
     res.status(200).json(courseData);
   } catch (error) {
     console.log(error.message);
