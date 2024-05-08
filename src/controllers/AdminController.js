@@ -44,6 +44,7 @@ export const login = async (req, res) => {
   }
 };
 
+
 export const getAllStudent = async (req, res) => {
   try {
     const student = await Student.find();
