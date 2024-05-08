@@ -202,7 +202,7 @@ export const updateCourseImage = async (req, res) => {
 
     const params = {
       Bucket: "masterylinks",
-      Key: `${Date.now()}.jpg`,
+      Key: `courses/images/${Date.now()}.jpg`,
       Body: file.buffer,
       ContentType: file.mimetype,
     };
@@ -210,6 +210,7 @@ export const updateCourseImage = async (req, res) => {
 
 
     await s3.send(new PutObjectCommand(params));
+    console.log(filePath);
     const courses = await Course.findById(courseId);
     courses.set({
       image: filePath,
