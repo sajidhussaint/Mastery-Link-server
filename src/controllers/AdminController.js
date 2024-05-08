@@ -231,11 +231,7 @@ export const getAllLanguage = async (req, res) => {
 };
 
 export const editLanguage = async (req, res) => {
-  try {
-    console.log('=================');
-    console.log(req.body,'===');
-    console.log('=================');
-    
+  try {   
     const { languageId, value } = req.body.data;
     if (languageId) {
       await Language.findOneAndUpdate({ _id: languageId }, { language: value });
@@ -379,7 +375,6 @@ export const unlistLevel = async (req, res) => {
 
 export const adminDashBoard = async (req, res) => {
   try {
-    console.log("=>>>> ");
 
     const enrolledCountByCategoryAndDate = await EnrolledCourse.aggregate([
       {

@@ -10,7 +10,6 @@ export const sendEmail = async (email) => {
       specialChars: false,
     });
 
-    console.log(otp);
 
     const transporter = nodemailer.createTransport({
       host: "smtp.gmail.com",

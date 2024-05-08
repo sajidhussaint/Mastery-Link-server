@@ -14,14 +14,7 @@ const io = new Server(httpServer, {
 const activeMembers = new Map();
 
 io.on("connection", (socket) => {
-  console.log(socket.client.conn.server.clientsCount, " user connected");
-
-  // const connectedClientsCount = Object.keys(io.sockets.sockets).length;
-  // console.log(connectedClientsCount, "connections");
-
-  // Listen for chat messages
   socket.on("join-room", (data) => {
-    console.log(data, "join room");
     socket.join(data.courseId);
 
     if (activeMembers.has(data.courseId)) {
@@ -38,8 +31,6 @@ io.on("connection", (socket) => {
 
   socket.on("get-all-messages", async ({ courseId }) => {
     const messages = await Chat.findOne({ courseId });
-
-    console.log(messages, "message founded");
     
     io.to(courseId).emit("get-course-response", messages);
   });
@@ -64,7 +55,6 @@ io.on("connection", (socket) => {
       const chatroom = Chat.build(chatDetails);
       await chatroom.save();
     }
-    console.log(data, "data  emit");
     io.to(data.courseId).emit("messageResponse", data);
     // socket.emit("messageResponse", data);
   });

@@ -134,7 +134,6 @@ export const login = async (req, res) => {
 export const getMycourses = async (req, res) => {
   try {
     const { instructor } = req.query;
-    console.log(instructor);
     const course = await Course.find({ instructor }).populate("category");
 
     res.status(200).json({ course });
@@ -208,7 +207,7 @@ export const updateCourseImage = async (req, res) => {
       ContentType: file.mimetype,
     };
     const filePath = `https://${params.Bucket}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${params.Key}`;
-    console.log(filePath);
+
 
     await s3.send(new PutObjectCommand(params));
     const courses = await Course.findById(courseId);
@@ -228,7 +227,6 @@ export const createModule = async (req, res) => {
   try {
     const { name, description, courseId } = req.body;
     const file = req.file;
-    // console.log(name, description, courseId, file);
     const existingModule = await Course.findById(courseId);
 
     const order = (existingModule?.modules?.length || 0) + 1;
@@ -260,7 +258,6 @@ export const createModule = async (req, res) => {
     }
     CourseData?.modules?.push({ module: module.id, order: order });
     await CourseData.save();
-    console.log(CourseData);
     res.status(200).json(CourseData);
   } catch (error) {
     console.log(error.message);
@@ -271,7 +268,6 @@ export const createModule = async (req, res) => {
 export const addChapter = async (req, res) => {
   try {
     const { moduleId, time, chapter } = req.body;
-    console.log(moduleId, time, chapter);
     const seconds = Number(time);
     const duration = secondsToHMS(seconds);
     const chapterDetails = {

@@ -141,7 +141,6 @@ export const login = async (req, res) => {
 export const getCourses = async (req, res) => {
   try {
     const { category, search } = req.query;
-    console.log(search);
 
     const inputs = {};
     if (search && search != "") {
@@ -208,11 +207,9 @@ export const getSingleCourse = async (req, res) => {
 
 export const stripePaymentIntent = async (req, res) => {
   try {
-    console.log("running stripe");
     const { courseId, studentId } = req.body;
-    console.log(courseId, studentId);
+
     const url = await stripePayment(courseId, studentId);
-    console.log("oooo");
     res.status(200).json(url);
   } catch (error) {
     console.log(error.message);
@@ -296,7 +293,6 @@ export const getEnrolledCourse = async (req, res) => {
 export const addNotes = async (req, res) => {
   try {
     const { enrolledId, notes } = req.body;
-    console.log(enrolledId, notes, "sss");
     const course = await EnrolledCourse.findById(enrolledId);
     course?.notes?.push(notes);
     await course?.save();
@@ -364,50 +360,15 @@ export const updateProfile = async (req, res) => {
   }
 };
 
-//TODO:remove func
 
-// export const searchCourses = async (req, res, next) => {
-//   try {
-//     const { search, category, level, language } = req.query;
-//     console.log(req.query);
-//     const inputs = {};
-
-//     if (search) {
-//       inputs.$or = [
-//         { name: { $regex: search, $options: "i" } },
-//         { description: { $regex: search, $options: "i" } },
-//       ];
-//     }
-
-//     if (category) {
-//       inputs.category = category;
-//     }
-//     if (level) {
-//       inputs.level = level;
-//     }
-//     if (language) {
-//       inputs.language = language;
-//     }
-
-//     const course = await Course.find({ approval: "approved", ...inputs })
-//       .populate("category")
-//       .populate("level");
-//     res.status(200).json(course);
-//   } catch (error) {
-//     console.log(error.message);
-//     return res.status(500).json({ message: "Internal Server Error" });
-//   }
-// };
 
 export const addProgression = async (req, res, next) => {
   try {
     const { enrollmentId, moduleId } = req.query;
-    console.log(enrollmentId);
     const progression = await EnrolledCourse.findOne({
       courseId: enrollmentId,
     });
     if (!progression) {
-      console.log("no progress");
       return res.status(400).json({ message: "Enrollment not found" });
     }
     if (!progression.progression?.includes(moduleId)) {

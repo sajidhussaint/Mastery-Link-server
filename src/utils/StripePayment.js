@@ -13,7 +13,6 @@ export const stripePayment = async (courseId, studentId) => {
     res.status(400).send({ message: "Already enrolled" });
   }
   if (!course) {
-    console.log("cousrse not fond");
     res.status(400).send({ message: "Course not found" });
   }
   const payment = await stripe.checkout.sessions.create({
