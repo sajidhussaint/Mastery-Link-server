@@ -7,7 +7,8 @@ const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
     // origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
+    origin: "https://mastery-link-client.vercel.app",
+    methods: ["GET", "POST", "PUT", "PATCH"],
   },
 });
 
